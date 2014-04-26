@@ -1,4 +1,4 @@
-setwd("G:\\Projects\\R\\Getting_Cleaning")
+#setwd("G:\\Projects\\R\\Getting_Cleaning")
 #Merges the training and the test sets to create one data set.
 #Extracts only the measurements on the mean and standard deviation for each measurement. 
 #Uses descriptive activity names to name the activities in the data set
