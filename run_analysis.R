@@ -82,7 +82,7 @@ combined_with_activity <- merge(y = final_means, x = activity_names, by.x = "Act
 
 #*********************************7******************************************************
 #save tiny dataset
-write.table(combined_with_activity, file="tinyDataset.txt", append=FALSE, row.names=FALSE, col.names=FALSE)
+write.table(combined_with_activity, file="tidyDataset.txt", append=FALSE, row.names=FALSE, col.names=FALSE)
 frame_tidy <- data.frame(combined_with_activity,row.names=NULL)
 #****************************************************************************************
 
