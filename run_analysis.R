@@ -69,7 +69,6 @@ combined_measured <- combined[,measurements]
 splitted_by_s_a <- split(x = combined_measured,f = list(combined_measured$Activity, combined_measured$Subjectid), drop = TRUE)
 col_means <- sapply(splitted_by_s_a,colMeans)
 final_means <- t(col_means)
-
 #****************************************************************************************
 
 
