@@ -6,19 +6,7 @@ setwd("G:\\Projects\\R\\Getting_Cleaning")
 #Creates a second, independent tidy data set with the average of each variable for
 # each activity and each subject. 
 
-#The explanation is as important as the script, so make sure you have the readme
-#have you combined the training and test x and y into one block, given them headings,
-# and turned the numeric activities into something easier to read.
-#have you extracted some variables to do with mean and standard deviation from the full set
-#have you explained what those variables are and your criteria for picking them in the readme
-#have you gotten the average of each variable for each combination of subject and activity 
-# and saved the data frame of this as a set of tidy data
-#have you loaded up your current script, an up to date readme! and your tidy data
-
-convertActivityNames <- function(){
-  #combined2[combined2$Activity == activity_names2[,1],"Activity"] <- activity_names2[,2]
-  split_by_activity$Activity = activity_names[split_by_activity$Activity,2]
-}
+#***************************************1************************************************
 # load data
 test_x_url <- "data\\UCI HAR Dataset\\test\\X_test.txt"
 test_y_url <- "data\\UCI HAR Dataset\\test\\y_test.txt"
@@ -30,59 +18,74 @@ test_subject_url <- "data\\UCI HAR Dataset\\test\\subject_test.txt"
 train_subject_url <- "data\\UCI HAR Dataset\\train\\subject_train.txt"
 
 activity_label_url <- "data\\UCI HAR Dataset\\activity_labels.txt"
+features_url <- "data\\UCI HAR Dataset\\features.txt"
 
-testXFile <- read.table(test_x_url)
+testXFile <- read.table(test_x_url) #,header=FALSE, check.names=FALSE
 testYFile <- read.table(test_y_url)
 test_bind <- cbind(testXFile,testYFile)
 
-test_subject <- read.table(test_subject_url)
+test_subject <- read.table(test_subject_url,header=FALSE, check.names=FALSE)
 test_bind <- cbind(test_bind,test_subject)
 
+trainXFile <- read.table(train_x_url)
+trainYFile <- read.table(train_y_url)
+train_bind <- cbind(trainXFile,trainYFile)
 
-#trainXFile <- read.table(train_x_url)
-#trainYFile <- read.table(train_y_url)
-#train_bind <- cbind(trainXFile,trainYFile)
+train_subject <- read.table(train_subject_url)
+train_bind <- cbind(train_bind,train_subject)
+#****************************************************************************************
 
-#train_subject <- read.table(train_subject_url)
-#train_bind <- cbind(train_bind,train_subject)
-#print(names(trainYFile))
-#names(trainXFile)
 
+#**************************************2*************************************************
 # add headers
-features <- read.table("data\\UCI HAR Dataset\\features.txt")
-names(test_bind)[1:561] <- features[,2]
+features <- read.table(features_url)
+names(test_bind)[1:561] = as.character(features[,2])
 names(test_bind)[562] <- "Activity"
 names(test_bind)[563] <- "Subjectid"
-#names(train_bind) <- features[,2]
-#print(features[,2])
-#print(test_bind$activity)
-#print(head(test_bind))
-#print(tail(names(test_bind)))
-# merge two data sets
-combined <- test_bind #rbind(test_bind, train_bind)
 
+names(train_bind)[1:561] = as.character(features[,2])
+names(train_bind)[562] <- "Activity"
+names(train_bind)[563] <- "Subjectid"
+#****************************************************************************************
+
+
+#************************************3***************************************************
+# merge two data sets
+combined <- rbind(test_bind, train_bind)
+#****************************************************************************************
+
+
+#***********************************4****************************************************
+# extract measurements on the mean and standard deviation for each measurement
+measurments_mean <- grep("mean\\(\\)",names(combined),value=TRUE)
+measurments_std <- grep("std\\(\\)",names(combined),value=TRUE)
+measurements <- c(measurments_mean, measurments_std, "Activity", "Subjectid")
+combined_measured <- combined[,measurements]
+#****************************************************************************************
+
+
+#*********************************5******************************************************
+# get the average of each variable for each combination of subject and activity
+splitted_by_s_a <- split(x = combined_measured,f = list(combined_measured$Activity, combined_measured$Subjectid), drop = TRUE)
+col_means <- sapply(splitted_by_s_a,colMeans)
+final_means <- t(col_means)
+
+#****************************************************************************************
+
+
+#**********************************6*****************************************************
 # replace activity numbers
 activity_names <- read.table(activity_label_url)
-#print(activity_names)
-#split_by_activity <- split(combined,f=combined$Activity)
-#print(split_by_activity[1][1])
-#ccc <- combined$Activity[(combined$Activity == activity_names[,1])]
-#sapply(combined$Activity, function(activity_names,combined) activity_names[combined$Activity,1], combined=combined)
-#sapply(split_by_activity,FUN=convertActivityNames)
-#print(head(ccc))
-#for(i in activity_names){
- # dd <- combined[(combined$Activity == activity_names[i,1]),]
-  #combined$Activity[(combined$Activity == activity_names[i,1]),] <- activity_names[i,2]
-  #print(dd)
-  #combined[(combined$Activity == activity_names[i,1]),"Activity"] <- activity_names[i,2]
-#}
+names(activity_names) <- c("Activityid","Activity")
+combined_with_activity <- merge(y = final_means, x = activity_names, by.x = "Activityid", by.y = "Activity", all=FALSE)
+#****************************************************************************************
 
-#print(attr(split_by_activity, "levels"))
-#combined[activity_names[,1]] <- activity_names[,2]
-#sapply(combined,FUN=convertActivityNames)
-#print(head(combined[combined$Activity == activity_names[,2],]))
 
-m <- merge(y = combined, x = activity_names, by.x = "V1", by.y = "Activity")
-print(head(combined))
+#*********************************7******************************************************
+#save tiny dataset
+write.table(combined_with_activity, file="tinyDataset.txt", append=FALSE, row.names=FALSE)
+frame_tidy <- data.frame(combined_with_activity,row.names=NULL)
+#****************************************************************************************
+
 
 
